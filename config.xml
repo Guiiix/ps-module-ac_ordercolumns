@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>ac_ordercolumns</name>
+    <displayName><![CDATA[AC - Order columns for Printed and Exported]]></displayName>
+    <version><![CDATA[1.0.0]]></version>
+    <description><![CDATA[Add two columns to the admin order list view.]]></description>
+    <author><![CDATA[Alternetic]]></author>
+    <tab><![CDATA[back_office_features]]></tab>
+    <is_configurable>0</is_configurable>
+    <need_instance>0</need_instance>
+</module>
