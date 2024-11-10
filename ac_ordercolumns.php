@@ -362,8 +362,10 @@ class ac_ordercolumns extends Module
     	$smarty = new Smarty();
     	$order = new Order(Tools::getValue("id_order"));
     	$url = "https://".$_SERVER['HTTP_HOST'].$this->_path;
-		$printed = Db::getInstance()->executeS("SELECT printed FROM " . _DB_PREFIX_ . "order_printed WHERE id_order=" . $order->id);
-        $exported = Db::getInstance()->executeS("SELECT exported FROM " . _DB_PREFIX_ . "order_printed WHERE id_order=" . $order->id);
+		$res = Db::getInstance()->getRow("SELECT printed FROM " . _DB_PREFIX_ . "order_printed WHERE id_order=" . $order->id);
+        $printed = array_key_exists('printed', $res) ? $res['printed'] : 0;
+        $res = Db::getInstance()->getRow("SELECT exported FROM " . _DB_PREFIX_ . "order_printed WHERE id_order=" . $order->id);
+        $exported = array_key_exists('exported', $res) ? $res['exported'] : 0;
     	$smarty->assign(array(
     		"url" => $url,
     		"id_employee" => $this->context->employee->id,
