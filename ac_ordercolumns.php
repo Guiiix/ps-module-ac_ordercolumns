@@ -24,6 +24,9 @@
 *  International Registred Trademark & Property of PrestaShop SA
 */
 
+require_once _PS_MODULE_DIR_ . 'ac_ordercolumns/src/Entity/OrderPrinted.php';
+require_once _PS_MODULE_DIR_ . 'ac_ordercolumns/src/Entity/OrderWithPrinted.php';
+
 Use PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn;
 Use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollection;
 use PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface;
@@ -42,7 +45,13 @@ class ac_ordercolumns extends Module
 	protected $error = false;
 	private $templateFile;
     const CONFIGURATION_KEY_SHOW_LOGO = true;
-    const HOOKS_LIST = array("actionOrderGridDefinitionModifier", "actionOrderGridQueryBuilderModifier" , "actionOrderGridDataModifier" /*  , "actionAdminOrdersListingFieldsModifier", "actionAdminOrdersListingResultsModifier" */);
+    const HOOKS_LIST = array(
+        "actionOrderGridDefinitionModifier",
+        "actionOrderGridQueryBuilderModifier", 
+        "actionOrderGridDataModifier",
+        "adminOrder",
+        "addWebserviceResources"
+    );
 
 	public function __construct()
 	{
@@ -348,4 +357,35 @@ class ac_ordercolumns extends Module
 //            }
 //        }
     }
+
+    function hookAdminOrder($params) {
+    	$smarty = new Smarty();
+    	$order = new Order(Tools::getValue("id_order"));
+    	$url = "https://".$_SERVER['HTTP_HOST'].$this->_path;
+		$printed = Db::getInstance()->executeS("SELECT printed FROM " . _DB_PREFIX_ . "order_printed WHERE id_order=" . $order->id);
+    	$smarty->assign(array(
+    		"url" => $url,
+    		"id_employee" => $this->context->employee->id,
+    		"id_order" => Tools::getValue("id_order"),
+    		"printed" => $printed,
+    		"token" => Tools::getAdminToken('AdminOrders'.(int)(Tab::getIdFromClassName('AdminOrders')). (int)$this->context->employee->id)
+    	));
+    	$js = '<script type="text/javascript">'.$smarty->fetch(__DIR__."/js/gestionprinted.js")."</script>";
+	    return $smarty->fetch(__DIR__."/tpl/admin.tpl").$js;
+    }
+
+    public function hookAddWebserviceResources($params)
+    {
+        return [
+            'orders_printed' => array(
+                'description' => 'Orders printed status',
+                'class' => 'OrderPrinted',
+            ),
+            'orders_with_printed' => array(
+                'description' => 'Order table with orders_printed association',
+                'class' => 'OrderWithPrinted',
+            )
+		
+		];
+	}
 }
