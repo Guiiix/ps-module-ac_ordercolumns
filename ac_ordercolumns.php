@@ -363,14 +363,17 @@ class ac_ordercolumns extends Module
     	$order = new Order(Tools::getValue("id_order"));
     	$url = "https://".$_SERVER['HTTP_HOST'].$this->_path;
 		$printed = Db::getInstance()->executeS("SELECT printed FROM " . _DB_PREFIX_ . "order_printed WHERE id_order=" . $order->id);
+        $exported = Db::getInstance()->executeS("SELECT exported FROM " . _DB_PREFIX_ . "order_printed WHERE id_order=" . $order->id);
     	$smarty->assign(array(
     		"url" => $url,
     		"id_employee" => $this->context->employee->id,
     		"id_order" => Tools::getValue("id_order"),
+            "exported" => $exported,
     		"printed" => $printed,
     		"token" => Tools::getAdminToken('AdminOrders'.(int)(Tab::getIdFromClassName('AdminOrders')). (int)$this->context->employee->id)
     	));
     	$js = '<script type="text/javascript">'.$smarty->fetch(__DIR__."/js/gestionprinted.js")."</script>";
+        $js = '<script type="text/javascript">'.$smarty->fetch(__DIR__."/js/gestionexported.js")."</script>";
 	    return $smarty->fetch(__DIR__."/tpl/admin.tpl").$js;
     }
 
