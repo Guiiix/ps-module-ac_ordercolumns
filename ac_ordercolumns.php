@@ -372,8 +372,7 @@ class ac_ordercolumns extends Module
     		"printed" => $printed,
     		"token" => Tools::getAdminToken('AdminOrders'.(int)(Tab::getIdFromClassName('AdminOrders')). (int)$this->context->employee->id)
     	));
-    	$js = '<script type="text/javascript">'.$smarty->fetch(__DIR__."/js/gestionprinted.js")."</script>";
-        $js = '<script type="text/javascript">'.$smarty->fetch(__DIR__."/js/gestionexported.js")."</script>";
+    	$js = '<script type="text/javascript">'.$smarty->fetch(__DIR__."/js/gestionprintedexported.js")."</script>";
 	    return $smarty->fetch(__DIR__."/tpl/admin.tpl").$js;
     }
 
