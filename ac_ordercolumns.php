@@ -49,7 +49,7 @@ class ac_ordercolumns extends Module
         "actionOrderGridDefinitionModifier",
         "actionOrderGridQueryBuilderModifier", 
         "actionOrderGridDataModifier",
-        "adminOrder",
+        "displayAdminOrder",
         "addWebserviceResources"
     );
 
@@ -358,7 +358,7 @@ class ac_ordercolumns extends Module
 //        }
     }
 
-    function hookAdminOrder($params) {
+    function hookDisplayAdminOrder($params) {
     	$smarty = new Smarty();
     	$order = new Order(Tools::getValue("id_order"));
     	$url = "https://".$_SERVER['HTTP_HOST'].$this->_path;
