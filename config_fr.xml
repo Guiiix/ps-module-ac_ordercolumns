@@ -3,7 +3,7 @@
     <name>ac_ordercolumns</name>
     <displayName><![CDATA[AC - Order columns for Printed and Exported]]></displayName>
     <version><![CDATA[1.0.0]]></version>
-    <description><![CDATA[Add two columns to the admin order list view.]]></description>
+    <description><![CDATA[Add two columns to PS orders.]]></description>
     <author><![CDATA[Alternetic]]></author>
     <tab><![CDATA[back_office_features]]></tab>
     <is_configurable>0</is_configurable>

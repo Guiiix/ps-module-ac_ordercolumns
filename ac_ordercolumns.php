@@ -56,7 +56,7 @@ class ac_ordercolumns extends Module
 		parent::__construct();
 
 		$this->displayName = $this->trans('AC - Order columns for Printed and Exported', array(), 'Modules.ACPrintedColumn');
-		$this->description = $this->trans('Add two columns to the admin order list view.', array(), 'Modules.ACPrintedColumn');
+		$this->description = $this->trans('Add two columns to PS orders.', array(), 'Modules.ACPrintedColumn');
 
 		$this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
 	}
