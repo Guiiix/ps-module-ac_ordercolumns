@@ -34,6 +34,7 @@ use PrestaShop\PrestaShop\Core\Grid\Column\ColumnCollection;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use PrestaShopBundle\Form\Admin\Type\YesAndNoChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 if (!defined('_PS_VERSION_')) {
 	exit;
@@ -49,6 +50,8 @@ class ac_ordercolumns extends Module
         "actionOrderGridDefinitionModifier",
         "actionOrderGridQueryBuilderModifier", 
         "actionOrderGridDataModifier",
+        "actionSlipPDFFormBuilderModifier",
+        "actionValidateOrder",
         "displayAdminOrder",
         "addWebserviceResources"
     );
@@ -152,6 +155,14 @@ class ac_ordercolumns extends Module
         /** @var PrestaShop\PrestaShop\Core\Grid\Definition\GridDefinitionInterface $definition */
         $definition = $params['definition'];
 
+
+        $columnText = new PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\DataColumn('carrier');
+        $columnText->setName($this->l('Transporteur'));
+        $columnText->setOptions([
+            'field' => 'carrier',
+        ]);
+
+
         if (static::CONFIGURATION_KEY_SHOW_LOGO) {
             $column = new PrestaShop\PrestaShop\Core\Grid\Column\Type\Common\ImageColumn('printed');
             $column->setName($this->l('Printed'));
@@ -187,6 +198,13 @@ class ac_ordercolumns extends Module
             ->getColumns()
             ->addAfter(
                 'date_add',
+                $columnText
+            );
+
+        $definition
+            ->getColumns()
+            ->addAfter(
+                'date_add',
                 $columnExported
             )
         ;
@@ -200,6 +218,9 @@ class ac_ordercolumns extends Module
 
         // https://devdocs.prestashop-project.org/8/development/components/grid/filter-types-reference/
         $definition->getFilters()
+            /* ->add(
+                (new Filter('carrier', TextType::class))->setAssociatedColumn('carrier')
+            ) */
             ->add(
                 (new Filter('printed', YesAndNoChoiceType::class))->setAssociatedColumn('printed')
             )
@@ -209,6 +230,15 @@ class ac_ordercolumns extends Module
     }
 
 
+    public function hookActionOrderDeliverySlipPdfForm(array $params)
+    {
+        /**
+         * @var Symfony\Component\Form\FormBuilderInterface $formBuilder
+         */
+        $formBuilder = $params['form_builder'];
+        // Find field named date_from
+        $formBuilder->get("date_from")->setData((new \DateTime('-30 days'))->format('Y-m-d'));
+    }
 
 
     /**
@@ -259,8 +289,16 @@ class ac_ordercolumns extends Module
         $searchCriteria = $params['search_criteria'];
 
         $searchQueryBuilder
+            ->addSelect('ct.`name` AS `carrier`')
             ->addSelect('opp.`printed` AS `printed`')
             ->addSelect('opp.`exported` AS `exported`');
+
+        $searchQueryBuilder->leftJoin(
+            'o',
+            '`' . _DB_PREFIX_ . 'carrier`',
+            'ct',
+            'ct.`id_carrier` = o.`id_carrier`'
+        );
 
         $searchQueryBuilder->leftJoin(
             'o',
@@ -268,6 +306,10 @@ class ac_ordercolumns extends Module
             'opp',
             'opp.`id_order` = o.`id_order`'
         );
+
+        if ('id_carrier' === $searchCriteria->getOrderBy()) {
+            $searchQueryBuilder->orderBy('ct.`name`', $searchCriteria->getOrderWay());
+        }
 
         if ('printed' === $searchCriteria->getOrderBy()) {
             $searchQueryBuilder->orderBy('opp.`printed`', $searchCriteria->getOrderWay());
@@ -283,6 +325,12 @@ class ac_ordercolumns extends Module
                 $searchQueryBuilder->andWhere('opp.`printed` = :printed');
                 $searchQueryBuilder->setParameter('printed', $filterValue);
             }
+            /*
+            if ('carrier' === $filterName) {
+                $searchQueryBuilder->andWhere('ct.`name` LIKE "%:carrier%"');
+                $searchQueryBuilder->setParameter('carrier', $filterValue);
+            }
+            */
             if ('exported' === $filterName) {
                 $searchQueryBuilder->andWhere('opp.`exported` = :exported');
                 $searchQueryBuilder->setParameter('exported', $filterValue);
@@ -358,6 +406,44 @@ class ac_ordercolumns extends Module
 //        }
     }
 
+    public function hookActionValidateOrder(array $params) {
+        $order = $params['order'];
+
+        // Création de l'enregistrement à vide en premier
+        Db::getInstance()->execute("INSERT INTO " . _DB_PREFIX_ . "order_printed (id_order, printed, exported) VALUES ({$order->id}, 0, 0)");
+
+        // Puis en second Requête d'insertion du printed si les paramètres feedbiz l'indiquent
+        // Utilisation d'un replace pour éviter les doublons
+        if(isset($order->id)) {
+            $orderId = (int)$order->id;
+            $temptablename = "temp_".uniqid();
+            $sql1 = "CREATE TEMPORARY TABLE ".$temptablename." AS 
+                SELECT o.id_order,fo.multichannel
+                FROM ("._DB_PREFIX_."feedbiz_orders AS fo,"._DB_PREFIX_."orders as o) 
+                LEFT JOIN "._DB_PREFIX_."order_printed AS op ON op.id_order=o.id_order 
+                WHERE (op.printed IS NULL OR op.printed=0) AND fo.id_order=o.id_order AND fo.multichannel='AFN' AND o.id_order=".$orderId.";";
+            //SELECT * FROM temp_1234;
+
+            $sql2 = "REPLACE INTO "._DB_PREFIX_."order_printed (id_order,printed,printed_date)
+                SELECT id_order, IF(multichannel='AFN',1,0) AS printed, IF(multichannel='AFN',NOW(),NULL) FROM ".$temptablename.";";
+            //SELECT * FROM ps_order_printed;
+
+            //SELECT o.id_order,IF(f.multichannel='AFN',1,0),IF(f.multichannel='AFN',NOW(),NULL) FROM "._DB_PREFIX_."feedbiz_orders"._DB_PREFIX_."feedbiz_orders f WHERE f.id_order=o.id_order";
+            try
+            {
+                Db::getInstance()->Execute($sql1);
+                Db::getInstance()->Execute($sql2);
+            }
+            catch (Exception $e)
+            {
+                $message = ($e->getMessage()); // probablement car la table n'existe pas
+            }
+        }
+
+
+
+    }
+
     function hookDisplayAdminOrder($params) {
     	$smarty = new Smarty();
     	$order = new Order(Tools::getValue("id_order"));
@@ -393,3 +479,4 @@ class ac_ordercolumns extends Module
 		];
 	}
 }
+

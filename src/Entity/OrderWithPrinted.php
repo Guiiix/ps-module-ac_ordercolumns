@@ -3,6 +3,7 @@
 class OrderWithPrinted extends Order
 {
     protected $webserviceParameters = [
+        // copied from Order class
         'objectMethods' => ['add' => 'addWs'],
         'objectNodeName' => 'order',
         'objectsNodeName' => 'orders',
@@ -32,15 +33,6 @@ class OrderWithPrinted extends Order
             ],
             'note' => [],
         ],
-	'linked_tables' => [
-	    'orders_printed' => [
-	        'table' => 'order_printed',
-		'fields' => [
-		    'exported'  => array('type' => self::TYPE_INT, 'validate' => 'isInt', 'sqlId' => 'exported')
-		],
-            ],
-        ],
-		
         'associations' => [
             'order_rows' => ['resource' => 'order_row', 'setter' => false, 'virtual_entity' => true,
                 'fields' => [
@@ -58,6 +50,15 @@ class OrderWithPrinted extends Order
                     'unit_price_tax_incl' => ['setter' => false],
                     'unit_price_tax_excl' => ['setter' => false],
                 ], ],
+        ],
+        // Add a link with OrderPrinted entity, see classes/webservice/WebserviceRequest::manageFilters
+        'linked_tables' => [
+	        'orders_printed' => [
+	            'table' => 'order_printed',
+		        'fields' => [
+		            'exported'  => array('type' => self::TYPE_INT, 'validate' => 'isInt', 'sqlId' => 'exported')
+		        ],
+            ],
         ],
     ];
 }

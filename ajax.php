@@ -13,12 +13,12 @@ function printSuccess() {
 }
 
 function updateStatus($type, $status) {
-    if (!in_array($status, [0, 1])) {
+    if (!in_array($status, [0, 1, 2])) {
         exitWithError();
     }
 
     $order = new Order(Tools::getValue("order"));
-    $res = Db::getInstance()->execute("UPDATE " . _DB_PREFIX_ . "order_printed SET {$type}=" . $status . " WHERE id_order=" . $order->id);
+    $res = Db::getInstance()->execute("UPDATE " . _DB_PREFIX_ . "order_printed SET {$type}=" . $status . ", {$type}_date=NOW() WHERE id_order=" . $order->id);
     if ($res) {
         printSuccess();
     }

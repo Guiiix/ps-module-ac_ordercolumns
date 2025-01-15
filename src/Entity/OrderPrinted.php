@@ -19,7 +19,6 @@ class OrderPrinted extends ObjectModel
         'multilang' => false,
         'fields' => array(
             'id_order' => array('type' => self::TYPE_INT, 'validate' => 'isInt', 'required' => true),
-	    //'order_state' => array('type' => self::TYPE_INT, 'validate' => 'isInt', 'required' => true),
             'printed'  => array('type' => self::TYPE_INT, 'validate' => 'isInt', 'required' => true),
             'printed_date' => ['type' => self::TYPE_DATE, 'validate' => 'isDate'],
             'exported'  => array('type' => self::TYPE_INT, 'validate' => 'isInt'),
@@ -36,13 +35,6 @@ class OrderPrinted extends ObjectModel
           'printed_date' => array(),
           'exported' => array('required' => true),
           'exported_date' => array(),
-        ),
-
-      // See classes/webservice/WebserviceRequest.php:1188
-      'linked_tables' => array(
-          'order' => array(
-	    'table' => 'orders'
-          )
-       )
+        )
     );
 }

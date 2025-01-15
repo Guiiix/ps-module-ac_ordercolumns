@@ -1,30 +1,18 @@
 $(document).ready(function() {
-	$('input[type="radio"][name="radExported"]').change(function() {
-		var exported;
-		$("#gestionexported_status_box").html("[...]");
+	$('select[name="order_exported"]').change(function() {
 		$.getJSON("{$url}ajax.php?exported="+this.value+"&token={$token}&employee={$id_employee}&order={$id_order}", function(d) {
-			if (d['status'] == "success") {
-				$("#gestionexported_status_box").html("[OK]");
-			}
-
-			else {
+			if (d['status'] !== "success") {
+				console.log("Erreur lors de la mise à jour de l'état de facturation de la commande");
 				console.log(d);
-				$("#gestionexported_status_box").html("[ERR]");
 			}
 		});
 	});
 
-    $('input[type="radio"][name="radPrinted"]').change(function() {
-		var printed;
-		$("#gestionprinted_status_box").html("[...]");
+    $('input[type="radio"][name="order_printed"]').change(function() {
 		$.getJSON("{$url}ajax.php?printed="+this.value+"&token={$token}&employee={$id_employee}&order={$id_order}", function(d) {
-			if (d['status'] == "success") {
-				$("#gestionprinted_status_box").html("[OK]");
-			}
-
-			else {
+			if (d['status'] !== "success") {
+				console.log("Erreur lors de la mise à jour de l'état d'impression de la commande");
 				console.log(d);
-				$("#gestionprinted_status_box").html("[ERR]");
 			}
 		});
 	});

@@ -8,29 +8,27 @@
 			<tbody>
 				<tr style="font-weight: bold">
 					<td>Imprimé</td>
-					<td>Facturé</td>
+					<td>Facturation</td>
 				</tr>
 				<tr>
 					<td>
 						<div>
-							<img src="/img/admin/enabled.gif" alt="">
-							<input type="radio" name="radPrinted" id="radPrintedY" {if $printed} checked {/if} value="1" />
-
-							<img src="/img/admin/disabled.gif">
-							<input type="radio" name="radPrinted" id="radPrintedN" {if !$printed} checked {/if} value="0" />
-
-							<div style="display:inline-block" id="gestionprinted_status_box"></div>
+							<span class="ps-switch" id="order_printed">
+								<input id="order_printed_0" class="ps-switch" name="order_printed" value="0" {if !$printed} checked {/if} type="radio" />
+								<label for="order_printed_0">Non</label>
+								<input id="order_printed_1" class="ps-switch" name="order_printed" value="1" {if $printed} checked {/if} type="radio">
+								<label for="order_printed_1">Oui</label>
+								<span class="slide-button"></span>
+							</span>
 						</div>
 					</td>
 					<td>
 						<div>
-							<img src="/img/admin/enabled.gif" alt="">
-							<input type="radio" name="radExported" id="radExportedY" {if $exported} checked {/if} value="1" />
-
-							<img src="/img/admin/disabled.gif">
-							<input type="radio" name="radExported" id="radExportedN" {if !$exported} checked {/if} value="0" />
-
-							<div style="display:inline-block" id="gestionexported_status_box"></div>
+							<select id="order_exported" name="order_exported" class="custom-select" aria-label="order_exported">
+								<option value="0"{if $exported === 0} selected{/if}>Non facturé</option>
+								<option value="1"{if $exported === 1} selected{/if}>Facturé</option>
+								<option value="2"{if $exported === 2} selected{/if}>Remboursé</option>
+							</select>
 						</div>
 					</td>
 				</tr>
