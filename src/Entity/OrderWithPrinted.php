@@ -53,11 +53,12 @@ class OrderWithPrinted extends Order
         ],
         // Add a link with OrderPrinted entity, see classes/webservice/WebserviceRequest::manageFilters
         'linked_tables' => [
-	        'orders_printed' => [
-	            'table' => 'order_printed',
-		        'fields' => [
-		            'exported'  => array('type' => self::TYPE_INT, 'validate' => 'isInt', 'sqlId' => 'exported')
-		        ],
+            'orders_printed' => [
+                'table' => 'order_printed',
+                'fields' => [
+                    'printed'  => array('type' => self::TYPE_INT, 'validate' => 'isInt', 'sqlId' => 'printed'),
+                    'exported'  => array('type' => self::TYPE_INT, 'validate' => 'isInt', 'sqlId' => 'exported')
+                ],
             ],
         ],
     ];
