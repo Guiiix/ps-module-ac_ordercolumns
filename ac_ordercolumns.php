@@ -62,8 +62,8 @@ class ac_ordercolumns extends Module
 		$this->bootstrap = false;
 		parent::__construct();
 
-		$this->displayName = $this->trans('AC - Order columns for Printed and Exported', array(), 'Modules.ACPrintedColumn');
-		$this->description = $this->trans('Add two columns to PS orders.', array(), 'Modules.ACPrintedColumn');
+		$this->displayName = $this->trans('AC - Order columns for Printed', array(), 'Modules.ACPrintedColumn');
+		$this->description = $this->trans('Add printed status to PS order.', array(), 'Modules.ACPrintedColumn');
 
 		$this->ps_versions_compliancy = array('min' => '1.6', 'max' => _PS_VERSION_);
 	}
@@ -85,12 +85,8 @@ class ac_ordercolumns extends Module
 	public function installDB()
     {
         $sql = "CREATE TABLE IF NOT EXISTS `"._DB_PREFIX_."order_printed`(
-            `id_order_printed` INT(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-            `id_order` INT(11) NOT NULL,
-            `printed` INT(11),
-            `printed_date` DATETIME,
-            `exported` INT(11),
-            `exported_date` DATETIME);";
+            `id_order` INT(11) NOT NULL PRIMARY KEY,
+            `printed` INT(11));";
         
         if(!$result=Db::getInstance()->Execute($sql))
         {
@@ -115,7 +111,8 @@ class ac_ordercolumns extends Module
 	
 	public function uninstallDB($drop_table = true)
     {
-		return true;
+        $sql = "DROP TABLE `"._DB_PREFIX_."order_printed`";
+		return Db::getInstance()->Execute($sql);
 	}
 
     function hookDisplayAdminOrder($params) {
@@ -124,17 +121,14 @@ class ac_ordercolumns extends Module
     	$url = Context::getContext()->shop->getBaseURL() . '/' .$this->_path;
 		$res = Db::getInstance()->getRow("SELECT printed FROM " . _DB_PREFIX_ . "order_printed WHERE id_order=" . $order->id);
         $printed = $res !== false && array_key_exists('printed', $res) ? $res['printed'] : 0;
-        $res = Db::getInstance()->getRow("SELECT exported FROM " . _DB_PREFIX_ . "order_printed WHERE id_order=" . $order->id);
-        $exported = $res !== false && array_key_exists('exported', $res) ? $res['exported'] : 0;
     	$smarty->assign(array(
     		"url" => $url,
     		"id_employee" => $this->context->employee->id,
     		"id_order" => Tools::getValue("id_order"),
-            "exported" => $exported,
     		"printed" => $printed,
     		"token" => Tools::getAdminToken('AdminOrders'.(int)(Tab::getIdFromClassName('AdminOrders')). (int)$this->context->employee->id)
     	));
-    	$js = '<script type="text/javascript">'.$smarty->fetch(__DIR__."/js/gestionprintedexported.js")."</script>";
+    	$js = '<script type="text/javascript">'.$smarty->fetch(__DIR__."/js/gestionprinted.js")."</script>";
 	    return $smarty->fetch(__DIR__."/tpl/admin.tpl").$js;
     }
 

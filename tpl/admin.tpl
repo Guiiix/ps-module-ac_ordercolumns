@@ -8,7 +8,6 @@
 			<tbody>
 				<tr style="font-weight: bold">
 					<td>Printed</td>
-					<td>Invoicing</td>
 				</tr>
 				<tr>
 					<td>
@@ -20,15 +19,6 @@
 								<label for="order_printed_1">Yes</label>
 								<span class="slide-button"></span>
 							</span>
-						</div>
-					</td>
-					<td>
-						<div>
-							<select id="order_exported" name="order_exported" class="custom-select" aria-label="order_exported">
-								<option value="0"{if $exported === 0} selected{/if}>No</option>
-								<option value="1"{if $exported === 1} selected{/if}>Invoiced</option>
-								<option value="2"{if $exported === 2} selected{/if}>Refuned</option>
-							</select>
 						</div>
 					</td>
 				</tr>

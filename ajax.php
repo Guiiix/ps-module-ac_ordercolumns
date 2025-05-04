@@ -13,12 +13,12 @@ function printSuccess() {
 }
 
 function updateStatus($type, $status) {
-    if (!in_array($status, [0, 1, 2])) {
+    if (!in_array($status, [0, 1])) {
         exitWithError();
     }
 
     $order = new Order(Tools::getValue("order"));
-    $res = Db::getInstance()->execute("UPDATE " . _DB_PREFIX_ . "order_printed SET {$type}=" . $status . ", {$type}_date=NOW() WHERE id_order=" . $order->id);
+    $res = Db::getInstance()->execute("REPLACE INTO " . _DB_PREFIX_ . "order_printed (id_order, printed) VALUES (" . $order->id . ", " . $status . ");");
     if ($res) {
         printSuccess();
     }
@@ -45,10 +45,6 @@ function main() {
 
     if (Tools::getIsset("printed")) {
         updateStatus("printed", Tools::getValue("printed"));
-    }
-
-    else if (Tools::getIsset("exported")) {
-        updateStatus("exported", Tools::getValue("exported"));
     }
 
     else {
